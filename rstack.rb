@@ -20,12 +20,62 @@ module RStack
 	    when :stack_print
 		p @stack
 	    else
-		throw "Unknown token"
+		throw "Unknown token #{token}"
+	    end
+	end
+    end
+
+    class Lexer
+	def self.lex(input)
+	    @tokens = []
+	    input.split.each do |token|
+		if is_number(token)
+		    @tokens += [:num, token.to_i]
+		else
+		    @tokens << token.to_sym
+		end
+	    end
+	    @tokens
+	end
+
+	private
+	def self.is_number(token)
+	    token.to_i.to_s == token
+	end
+    end
+
+    class Optimizer
+	def self.optimize(tokens)
+	    token_match(tokens, [:num, Fixnum, :num, Fixnum, :add]) { |w| p w; [:num, w[1] + w[3]] }
+	    tokens
+	end
+
+	private
+	# token_match([:num, Fixnum, :num, Fixnum])
+	def self.token_match(tokens, pattern)
+	    return if pattern.length > tokens.length
+	    offset = 0
+
+	    while offset <= tokens.length - pattern.length
+		window = tokens[offset, pattern.length]
+		matched = true
+		window.each_with_index do |token, index|
+		    unless pattern[index] === token
+			matched = false
+			break
+		    end
+		end
+		if matched
+		    tokens[offset, pattern.length] = yield window
+		else
+		    offset = offset + 1
+		end
 	    end
 	end
     end
 end
 
 if __FILE__ == $0
-    RStack::VM.new.exec([:num, 2, :num, 4, :add, :stack_print])
+    include RStack
+    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 add 6 add stack_print")))
 end
