@@ -20,7 +20,12 @@ module RStack
 	    when :stack_print
 		p @stack
 	    else
-		throw "Unknown token #{token}"
+		if @stack.length > 0 and @stack[-1].respond_to? token
+		    result = @stack.pop.send(token)
+		    @stack.push result unless result.nil?
+		else
+		    throw "Unknown token #{token}"
+		end
 	    end
 	end
     end
@@ -82,5 +87,5 @@ end
 
 if __FILE__ == $0
     include RStack
-    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 + 3 / stack_print")))
+    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 + 3 / to_f stack_print")))
 end
