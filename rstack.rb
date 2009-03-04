@@ -2,16 +2,31 @@ module RStack
     class VM
 	def initialize
 	    @stack = []
+	    @compiling = false
+	    @target = []
+	    @tokens_stack = []
 	end
 
 	def exec(tokens)
+	    @tokens_stack.push @tokens
 	    @tokens = tokens
 	    while @tokens.length > 0
 		exec_token @tokens.shift
 	    end
+	    @tokens = @tokens_stack.pop
 	end
 
 	def exec_token(token)
+	    if @compiling
+		if token == :']'
+		    @compiling = false
+		    @stack.push @target
+		    @target = []
+		end
+		@target.push token
+		return
+	    end
+
 	    case token
 	    when :num
 		@stack.push(@tokens.shift)
@@ -21,6 +36,10 @@ module RStack
 		p @stack
 	    when :swap
 		@stack[-2, 2] = @stack[-2, 2].reverse
+	    when :'['
+		@compiling = true
+	    when :call
+		exec @stack.pop
 	    else
 		if @stack.length > 0 and @stack[-1].respond_to? token
 		    target = @stack.pop
@@ -98,5 +117,5 @@ end
 
 if __FILE__ == $0
     include RStack
-    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 + 3 swap / stack_print")))
+    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 + 3 swap / [ stack_print ] call")))
 end
