@@ -45,8 +45,13 @@ module RStack
     end
 
     class Optimizer
+	class ArithmeticOperation
+	    def self.===(op)
+		return [:+, :-, :*, :/]
+	    end
+	end
 	def self.optimize(tokens)
-	    token_match(tokens, [:num, Fixnum, :num, Fixnum, :add]) { |w| p w; [:num, w[1] + w[3]] }
+	    token_match(tokens, [:num, Fixnum, :num, Fixnum, ArithmeticOperation]) { |w| [:num, w[1].send(w[4], w[3])] }
 	    tokens
 	end
 
@@ -77,5 +82,5 @@ end
 
 if __FILE__ == $0
     include RStack
-    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 add 6 add stack_print")))
+    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 + 3 / stack_print")))
 end
