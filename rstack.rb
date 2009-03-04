@@ -19,9 +19,19 @@ module RStack
 		@stack.push(@stack.pop + @stack.pop)
 	    when :stack_print
 		p @stack
+	    when :swap
+		@stack[-2, 2] = @stack[-2, 2].reverse
 	    else
 		if @stack.length > 0 and @stack[-1].respond_to? token
-		    result = @stack.pop.send(token)
+		    target = @stack.pop
+		    arity = target.method(token).arity
+		    if arity > 0
+			args = @stack[-arity, arity]
+			@stack[-arity, arity] = []
+			result = target.send(token, *args)
+		    else
+			result = target.send(token)
+		    end
 		    @stack.push result unless result.nil?
 		else
 		    throw "Unknown token #{token}"
@@ -56,7 +66,7 @@ module RStack
 	    end
 	end
 	def self.optimize(tokens)
-	    token_match(tokens, [:num, Fixnum, :num, Fixnum, ArithmeticOperation]) { |w| [:num, w[1].send(w[4], w[3])] }
+	    #token_match(tokens, [:num, Fixnum, :num, Fixnum, ArithmeticOperation]) { |w| [:num, w[1].send(w[4], w[3])] }
 	    tokens
 	end
 
@@ -87,5 +97,5 @@ end
 
 if __FILE__ == $0
     include RStack
-    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 + 3 / to_f stack_print")))
+    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 + 3 swap / stack_print")))
 end
