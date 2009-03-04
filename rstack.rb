@@ -5,6 +5,7 @@ module RStack
 	    @compiling = false
 	    @target = []
 	    @tokens_stack = []
+	    @tokens = []
 	end
 
 	def exec(tokens)
@@ -85,14 +86,18 @@ module RStack
 	    end
 	end
 	def self.optimize(tokens)
-	    token_match(tokens, [:num, Fixnum, :num, Fixnum, ArithmeticOperation]) { |w| [:num, w[3].send(w[4], w[1])] }
-	    token_match(tokens, [:num, Fixnum, :num, Fixnum, :swap]) { |w| a = w[1]; w[1] = w[3]; w[3] = a; w[0,4] }
+	    old_tokens = []
+	    while tokens != old_tokens
+		old_tokens = tokens.dup
+		token_match(tokens, 'Constant arithmetic', [:num, Fixnum, :num, Fixnum, ArithmeticOperation]) { |w| [:num, w[3].send(w[4], w[1])] }
+		token_match(tokens, 'Constant swap', [:num, Fixnum, :num, Fixnum, :swap]) { |w| a = w[1]; w[1] = w[3]; w[3] = a; w[0,4] }
+	    end
 	    tokens
 	end
 
 	private
 	# token_match([:num, Fixnum, :num, Fixnum])
-	def self.token_match(tokens, pattern)
+	def self.token_match(tokens, pass_name, pattern)
 	    return if pattern.length > tokens.length
 	    offset = 0
 
@@ -106,7 +111,9 @@ module RStack
 		    end
 		end
 		if matched
+		    old_tokens = tokens.dup
 		    tokens[offset, pattern.length] = yield window
+		    puts "#{pass_name}: #{old_tokens.inspect} -> #{tokens.inspect}" if $DEBUG
 		else
 		    offset = offset + 1
 		end
