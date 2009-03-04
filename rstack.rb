@@ -66,7 +66,8 @@ module RStack
 	    end
 	end
 	def self.optimize(tokens)
-	    #token_match(tokens, [:num, Fixnum, :num, Fixnum, ArithmeticOperation]) { |w| [:num, w[1].send(w[4], w[3])] }
+	    token_match(tokens, [:num, Fixnum, :num, Fixnum, ArithmeticOperation]) { |w| [:num, w[3].send(w[4], w[1])] }
+	    token_match(tokens, [:num, Fixnum, :num, Fixnum, :swap]) { |w| a = w[1]; w[1] = w[3]; w[3] = a; w[0,4] }
 	    tokens
 	end
 
