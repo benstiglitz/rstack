@@ -62,7 +62,7 @@ module RStack
     class Optimizer
 	class ArithmeticOperation
 	    def self.===(op)
-		return [:+, :-, :*, :/]
+		return [:+, :-, :*, :/].include?(op)
 	    end
 	end
 	def self.optimize(tokens)
