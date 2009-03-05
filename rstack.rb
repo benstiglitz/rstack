@@ -30,7 +30,7 @@ module RStack
 	    end
 
 	    case token
-	    when :num
+	    when :cons
 		@stack.push(@tokens.shift)
 	    when :add
 		@stack.push(@stack.pop + @stack.pop)
@@ -72,9 +72,13 @@ module RStack
 	    @tokens = []
 	    input.split.each do |token|
 		if is_fixnum(token)
-		    @tokens += [:num, token.to_i]
+		    @tokens += [:cons, token.to_i]
 		elsif is_float(token)
-		    @tokens += [:num, token.to_f]
+		    @tokens += [:cons, token.to_f]
+		elsif is_symbol(token)
+		    @tokens += [:cons, token[1, token.length - 1].to_sym]
+		elsif is_constant(token)
+		    @tokens += [:cons, Kernel.const_get(token)]
 		else
 		    @tokens << token.to_sym
 		end
@@ -89,6 +93,12 @@ module RStack
 	def self.is_float(token)
 	    token.to_f.to_s == token
 	end
+	def self.is_symbol(token)
+	    token[0] == ":"[0]
+	end
+	def self.is_constant(token)
+	    token[0] >= 65 and token[0] <= 90
+	end
     end
 
     class Optimizer
@@ -101,15 +111,15 @@ module RStack
 	    old_tokens = []
 	    while tokens != old_tokens
 		old_tokens = tokens.dup
-		token_match(tokens, 'Constant arithmetic', [:num, Fixnum, :num, Fixnum, ArithmeticOperation]) { |w| [:num, w[3].send(w[4], w[1])] }
-		token_match(tokens, 'Constant swap', [:num, Fixnum, :num, Fixnum, :swap]) { |w| a = w[1]; w[1] = w[3]; w[3] = a; w[0,4] }
+		token_match(tokens, 'Constant arithmetic', [:cons, Numeric, :cons, Numeric, ArithmeticOperation]) { |w| [:cons, w[3].send(w[4], w[1])] }
+		token_match(tokens, 'Constant swap', [:cons, Object, :cons, Object, :swap]) { |w| a = w[1]; w[1] = w[3]; w[3] = a; w[0,4] }
 		token_match(tokens, 'Call hoist', [:'[', Object, :']', :call]) { |w| w[1] }
 	    end
 	    tokens
 	end
 
 	private
-	# token_match([:num, Fixnum, :num, Fixnum])
+	# token_match([:cons, Fixnum, :cons, Fixnum])
 	def self.token_match(tokens, pass_name, pattern)
 	    return if pattern.length > tokens.length
 	    offset = 0
