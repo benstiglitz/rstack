@@ -70,8 +70,10 @@ module RStack
 	def self.lex(input)
 	    @tokens = []
 	    input.split.each do |token|
-		if is_number(token)
+		if is_fixnum(token)
 		    @tokens += [:num, token.to_i]
+		elsif is_float(token)
+		    @tokens += [:num, token.to_f]
 		else
 		    @tokens << token.to_sym
 		end
@@ -80,8 +82,11 @@ module RStack
 	end
 
 	private
-	def self.is_number(token)
+	def self.is_fixnum(token)
 	    token.to_i.to_s == token
+	end
+	def self.is_float(token)
+	    token.to_f.to_s == token
 	end
     end
 
