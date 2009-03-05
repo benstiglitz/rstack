@@ -129,7 +129,15 @@ module RStack
     end
 end
 
+def prompt
+    print "rstack> "
+    gets
+end
 if __FILE__ == $0
     include RStack
-    VM.new.exec(Optimizer.optimize(Lexer.lex("2 4 + 3 swap / [ stack_print ] call")))
+    vm = VM.new
+    while input = prompt
+	vm.exec(Optimizer.optimize(Lexer.lex(input)))
+	vm.exec([:stack_print])
+    end
 end
