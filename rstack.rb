@@ -23,8 +23,9 @@ module RStack
 		    @compiling = false
 		    @stack.push @target
 		    @target = []
+		else
+		    @target.push token
 		end
-		@target.push token
 		return
 	    end
 
