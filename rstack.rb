@@ -97,6 +97,7 @@ module RStack
 		old_tokens = tokens.dup
 		token_match(tokens, 'Constant arithmetic', [:num, Fixnum, :num, Fixnum, ArithmeticOperation]) { |w| [:num, w[3].send(w[4], w[1])] }
 		token_match(tokens, 'Constant swap', [:num, Fixnum, :num, Fixnum, :swap]) { |w| a = w[1]; w[1] = w[3]; w[3] = a; w[0,4] }
+		token_match(tokens, 'Call hoist', [:'[', Object, :']', :call]) { |w| w[1] }
 	    end
 	    tokens
 	end
