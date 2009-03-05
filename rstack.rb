@@ -41,6 +41,12 @@ module RStack
 		@compiling = true
 	    when :call
 		exec @stack.pop
+	    when :drop
+		if @stack.length > 0
+		    @stack.pop
+		else
+		    throw "Stack underflow"
+		end
 	    else
 		if @stack.length > 0 and @stack[-1].respond_to? token
 		    target = @stack.pop
