@@ -153,7 +153,11 @@ if __FILE__ == $0
     include RStack
     vm = VM.new
     while input = prompt
-	vm.exec(Optimizer.optimize(Lexer.lex(input)))
-	vm.exec([:stack_print])
+	begin
+	    vm.exec(Optimizer.optimize(Lexer.lex(input)))
+	    vm.exec([:stack_print])
+	rescue Exception => e
+	    puts "Caught \"#{e}\"\n"
+	end
     end
 end
