@@ -15,6 +15,7 @@ module RStack
 		exec_token @tokens.shift
 	    end
 	    @tokens = @tokens_stack.pop
+	    nil
 	end
 
 	def exec_token(token)
@@ -48,6 +49,12 @@ module RStack
 		else
 		    throw "Stack underflow"
 		end
+	    when :def
+		args = @stack.pop
+		name = @stack.pop
+		vm = self
+		meth = Proc.new { vm.exec(args) }
+		Object.instance_eval { define_method(name, meth) }
 	    else
 		if @stack.length > 0 and @stack[-1].respond_to? token
 		    target = @stack.pop
