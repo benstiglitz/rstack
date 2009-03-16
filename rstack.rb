@@ -55,6 +55,20 @@ module RStack
 		vm = self
 		meth = Proc.new { vm.exec(args) }
 		Object.instance_eval { define_method(name, meth) }
+	    when :over
+		if @stack.length > 1
+		    @stack.push @stack[-2]
+		else
+		    throw "Stack underflow"
+		end
+	    when :rot
+		if @stack.length > 2
+		    substack = @stack[-3, 3]
+		    substack.push substack.shift
+		    @stack[-3, 3] = substack
+		else
+		    throw "Stack underflow"
+		end
 	    else
 		if @stack.length > 0 and @stack[-1].respond_to? token
 		    target = @stack.pop
