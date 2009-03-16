@@ -91,8 +91,12 @@ module RStack
     class Lexer
 	def self.lex(input)
 	    @tokens = []
-	    input.split.each do |token|
-		if is_fixnum(token)
+            input = input.scan(/\".*\"|\S+/)
+            until input.empty?
+                token = input.shift
+                if token[0] == '"'[0]
+                    @tokens += [:cons, token[1, token.length - 2]]
+                elsif is_fixnum(token)
 		    @tokens += [:cons, token.to_i]
 		elsif is_float(token)
 		    @tokens += [:cons, token.to_f]
