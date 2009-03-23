@@ -6,11 +6,12 @@ module RStack
 	    @target = []
 	    @tokens_stack = []
 	    @tokens = []
+	    @dictionary = {}
 	end
 
 	def exec(tokens)
 	    @tokens_stack.push @tokens
-	    @tokens = tokens
+	    @tokens = tokens.dup
 	    while @tokens.length > 0
 		exec_token @tokens.shift
 	    end
@@ -54,7 +55,7 @@ module RStack
 		name = @stack.pop
 		vm = self
 		meth = Proc.new { vm.exec(args) }
-		Object.instance_eval { define_method(name, meth) }
+		@dictionary[name] = meth
 	    when :over
 		if @stack.length > 1
 		    @stack.push @stack[-2]
@@ -80,7 +81,9 @@ module RStack
 		result = receiver.send(message, *args)
 		@stack.push result
 	    else
-		if @stack.length > 0 and @stack[-1].respond_to? token
+		if @dictionary[token]
+		    @dictionary[token].call
+		elsif @stack.length > 0 and @stack[-1].respond_to? token
 		    target = @stack.pop
 		    arity = target.method(token).arity
 		    if arity > 0
