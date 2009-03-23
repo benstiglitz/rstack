@@ -69,6 +69,16 @@ module RStack
 		else
 		    throw "Stack underflow"
 		end
+	    when :"<native-call>"
+		arity = @stack.pop
+		message = @stack.pop
+		receiver = @stack.pop
+		args = []
+		arity.times do
+		    args.unshift @stack.pop
+		end
+		result = receiver.send(message, *args)
+		@stack.push result
 	    else
 		if @stack.length > 0 and @stack[-1].respond_to? token
 		    target = @stack.pop
