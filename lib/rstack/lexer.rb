@@ -1,11 +1,16 @@
 module RStack
     class Lexer
 	def self.lex(input)
+	    @comment = false
 	    @tokens = []
             input = input.scan(/\".*\"|\S+/)
             until input.empty?
                 token = input.shift
-                if token[0] == '"'[0]
+                if @comment
+		    if token == ')'
+			@comment = false
+		    end
+                elsif token[0] == '"'[0]
                     @tokens += [:cons, token[1, token.length - 2]]
                 elsif is_fixnum(token)
 		    @tokens += [:cons, token.to_i]
@@ -15,6 +20,8 @@ module RStack
 		    @tokens += [:cons, token[1, token.length - 1].to_sym]
 		elsif is_constant(token)
 		    @tokens += [:cons, Kernel.const_get(token)]
+		elsif token == '('
+		    @comment = true
 		else
 		    @tokens << token.to_sym
 		end
