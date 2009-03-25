@@ -71,6 +71,13 @@ module RStack
 		result = receiver.send(message, *args)
 		@stack.push result
 	    end
+	    define_primitive :if do
+		false_block = @stack.pop
+		true_block = @stack.pop
+		flag = @stack.pop
+		flag = !(flag == 0 or flag == :f)
+		exec(flag ? true_block : false_block)
+	    end
 	end
 
 	def exec(tokens)
