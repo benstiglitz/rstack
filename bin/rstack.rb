@@ -4,15 +4,17 @@ require 'rstack'
 
 def prompt
     print "rstack> "
-    gets
+    STDIN.gets
 end
 if __FILE__ == $0
     include RStack
     vm = VM.new
 
     # read prelude
-    prelude_path = File.join(File.dirname(File.dirname(__FILE__)), 'lib', 'prelude.rs')
-    vm.exec(Optimizer.optimize(Lexer.lex(File.read(prelude_path))))
+    unless ARGV.include?('--no-prelude')
+	prelude_path = File.join(File.dirname(File.dirname(__FILE__)), 'lib', 'prelude.rs')
+	vm.exec(Optimizer.optimize(Lexer.lex(File.read(prelude_path))))
+    end
 
     # start REPL
     while input = prompt
