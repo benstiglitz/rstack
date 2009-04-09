@@ -61,6 +61,7 @@ module RStack
 		end
 	    end
 	    define_primitive :native_call do
+		is_block = @stack.pop
 		arity = @stack.pop
 		message = @stack.pop
 		receiver = @stack.pop
@@ -68,7 +69,12 @@ module RStack
 		arity.times do
 		    args.unshift @stack.pop
 		end
-		result = receiver.send(message, *args)
+		if is_block
+		    block = @stack.pop
+		    result = receiver.send(message, *args) { exec(block) }
+		else
+		    result = receiver.send(message, *args)
+		end
 		@stack.push result
 	    end
 	    define_primitive :if do
