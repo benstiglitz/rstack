@@ -20,6 +20,8 @@ module RStack
 		    @tokens += [:cons, token[1, token.length - 1].to_sym]
 		elsif is_constant(token)
 		    @tokens += [:cons, Kernel.const_get(token)]
+		elsif is_boolean(token)
+		    @tokens += [:cons, token[1] == "t"[0] ? true : false]
 		elsif token == '('
 		    @comment = true
 		else
@@ -41,6 +43,9 @@ module RStack
 	end
 	def self.is_constant(token)
 	    token[0] >= 65 and token[0] <= 90
+	end
+	def self.is_boolean(token)
+	    token[0] == "#"[0] and (token[1] == "t"[0] or token[1] == "f"[0])
 	end
     end
 end

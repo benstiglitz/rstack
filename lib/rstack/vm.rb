@@ -75,7 +75,7 @@ module RStack
 		false_block = @stack.pop
 		true_block = @stack.pop
 		flag = @stack.pop
-		flag = !(flag == 0 or flag == :f)
+		flag = !(flag == 0 or flag == false)
 		exec(flag ? true_block : false_block)
 	    end
 	end
