@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 $LOAD_PATH << File.join(File.dirname(File.dirname(__FILE__)), 'lib')
 require 'rstack'
+require 'pp'
 
 def prompt
     print "rstack> "
@@ -23,6 +24,7 @@ if __FILE__ == $0
 	    vm.exec([:stack_print])
 	rescue Exception => e
 	    puts "Caught \"#{e}\"\n"
+	    pp e.backtrace if $DEBUG
 	end
     end
 end
