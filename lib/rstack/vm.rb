@@ -6,8 +6,8 @@ module RStack
 
 	def initialize
 	    @stack = []
-	    @compiling = false
-	    @target = []
+	    @target = @stack
+	    @target_stack = []
 	    @tokens_stack = []
 	    @tokens = []
 
@@ -23,9 +23,6 @@ module RStack
 	    end
 	    define_primitive :swap do
 		@stack[-2, 2] = @stack[-2, 2].reverse
-	    end
-	    define_primitive :'[' do
-		@compiling = true
 	    end
 	    define_primitive :call do
 		exec @stack.pop
@@ -97,11 +94,18 @@ module RStack
 	end
 
 	def exec_token(token)
-	    if @compiling
+	    if token == :'['
+		@target_stack.push @target
+		@target = []
+		return
+	    end
+
+	    if @target_stack.size > 0
 		if token == :']'
-		    @compiling = false
-		    @stack.push @target
-		    @target = []
+		    block = @target
+		    @target = @target_stack.pop
+		    @target.push :cons if @target_stack.size > 0
+		    @target.push block
 		else
 		    @target.push token
 		end
